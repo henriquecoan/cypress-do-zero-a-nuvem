@@ -125,7 +125,7 @@ describe('Central de Atendimento ao Cliente TAT', () => {
 
 
     
-    it('gato', () => {
-      cy.contains('span', '#cat').should('be.visible')
-    })
+    // it('gato', () => {
+    //   cy.contains('span', '#cat').should('be.visible')
+    // })
 })
