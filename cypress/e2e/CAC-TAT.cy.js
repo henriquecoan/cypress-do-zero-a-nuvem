@@ -9,18 +9,24 @@ describe('Central de Atendimento ao Cliente TAT', () => {
   })
 
 
-  it('preenche os campos obrigatórios e envia o formulário', () => {
+  it('preenche os campos obrigatórios e envia o formulário', function() {
+    cy.clock()
     cy.contains('label', 'Nome').type('Henrique')
     cy.get('#lastName').type('Coan')
     cy.get('#email').type('Henrique@email.com')
     cy.get('#open-text-area').type('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', {delay:0})
     cy.get('button[type="submit"]').click()
     cy.get('.success').should('be.visible')
+    cy.tick(5000)
+    cy.get('.success').should('not.be.visible')
   })
 
+
+  //roda o teste repetidamente 5x
+  Cypress._.times(5, () => {
   it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', () => {
     cy.get('#phone').type('aaaaa').should('be.empty')
-  })
+  })})
 
   it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', () => {
     cy.get('#firstName').type('Henrique')
@@ -123,9 +129,45 @@ describe('Central de Atendimento ao Cliente TAT', () => {
         cy.title().should('eq', 'Central de Atendimento ao Cliente TAT - Política de Privacidade')
     })
 
-
+    it('exibe e oculta as mensagens de sucesso e erro usando .invoke()', () => {
+      cy.get('.success')
+        .should('not.be.visible')
+        .invoke('show')
+        .should('be.visible')
+        .and('contain', 'Mensagem enviada com sucesso.')
+        .invoke('hide')
+        .should('not.be.visible')
+      cy.get('.error')
+        .should('not.be.visible')
+        .invoke('show')
+        .should('be.visible')
+        .and('contain', 'Valide os campos obrigatórios!')
+        .invoke('hide')
+        .should('not.be.visible')
+    })
     
-    // it('gato', () => {
-    //   cy.contains('span', '#cat').should('be.visible')
-    // })
+
+    it.only('gato', () => {
+      cy.get('#cat')
+        //.should('not.be.visible')
+        .invoke('show')
+    })
+
+    it('preenche o campo da área de texto usando o comando invoke', () => {
+      cy.get('#open-text-area')
+        .invoke('val', 'um texto qualquer')
+        .should('have.value', 'um texto qualquer')
+    })
+
+    it('faz uma requisição HTTP', () => {
+      cy.request('GET', 'https://cac-tat-v3.s3.eu-central-1.amazonaws.com/index.html').then((response) => {
+        console.log(response)
+        // Verifica o status da resposta
+        expect(response.status).to.eq(200);
+        // Verifica se statusText retornou ok
+        expect(response.statusText ).to.eq('OK');
+        // Verifica se o body contem o texto em questão
+        expect(response.body).to.include('CAC TAT');
+      });
+    })
 })
